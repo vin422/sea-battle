@@ -1,17 +1,17 @@
 import java.util.Scanner;
 import java.util.Random;
+import java.util.ArrayList;
 public class Main
 {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
         boolean startNewGame = true;
+        int gamesCount = 0;
+        ArrayList<Integer> leaderboard = new ArrayList<>();
         while (startNewGame) {
-            int[][] field = new int[11][11];  //4 = miss
-            //                                  0 = nothing here
-            //                                  1 = hit
-            //                                  2 = sunk
-            //                                  3 = ship is placed there
+            gamesCount++;
+            int[][] field = new int[11][11];
             int direction = random.nextInt(2); //0  = vertical; 1 = horizontal
 
             //3 squares
@@ -136,23 +136,23 @@ public class Main
             printField(actualField);
             System.out.println("Enter the coordinates of your shot");
             int movesCount = 0;
-            int firstIndex;
-            int secondIndex;
+            int firstLocation;
+            int secondLocation;
             boolean isGameUnfinished = true;
             while (isGameUnfinished) {
                 try {
-                    firstIndex = scanner.nextInt();
-                    secondIndex = scanner.nextInt();
+                    firstLocation = scanner.nextInt();
+                    secondLocation = scanner.nextInt();
                     movesCount++;
 
 
-                    //checks if players move hit something
-                    if (actualField[firstIndex - 1][secondIndex - 1] == 3) {
-                        actualField[firstIndex - 1][secondIndex - 1] = 1;
+                    //checks if player's move hit something
+                    if (actualField[firstLocation - 1][secondLocation - 1] == 3) {
+                        actualField[firstLocation - 1][secondLocation - 1] = 1;
                         printField(actualField);
-                    } // else if it didnt hit
-                    else if (actualField[firstIndex - 1][secondIndex - 1] == 0) {
-                        actualField[firstIndex - 1][secondIndex - 1] = 4;
+                    } // else if it didnt
+                    else if (actualField[firstLocation - 1][secondLocation - 1] == 0) {
+                        actualField[firstLocation - 1][secondLocation - 1] = 4;
                         printField(actualField);
                     }
                     //4 = miss
@@ -193,8 +193,8 @@ public class Main
                         actualField[ship4IndexJ][ship4IndexK] = 2;
                         printField(actualField);
                     }
-                    //check 2 2sq ships
 
+                    //check 2 2sq ships
                     if (shipDirection1 == 0 && actualField[TwoShip1IndexJ][TwoShip1IndexK] == 1 && actualField[TwoShip1IndexJ + 1][TwoShip1IndexK] == 1) {
                         for (int i = 0; i < 2; i++) {
                             actualField[TwoShip1IndexJ][TwoShip1IndexK] = 2;
@@ -243,6 +243,18 @@ public class Main
                         if (userDecision == 0) {
                             startNewGame = false;
                         }
+                        //adds player to leaderboard
+                        if (gamesCount == 1) {
+                            leaderboard.add(gamesCount);
+                        }
+                        else {
+                            if (movesCount <= leaderboard.get(0)) {
+                                leaderboard.add(0, gamesCount);
+                            }
+                            else {
+                                leaderboard.add(gamesCount);
+                            }
+                        }
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.out.println("Enter valid coordinates");
@@ -250,13 +262,31 @@ public class Main
                 }
             }
         }
+        System.out.print("\033c");
+        System.out.println("Game finished. Leaderboard:");
+        for (Integer integer : leaderboard) {
+            System.out.println("Player " + integer);
+        }
     }
-
     private static void printField(int[][] actualField) {
         System.out.print("\033c");
+        System.out.println("# = miss");
+        System.out.println("? = hit");
+        System.out.println("X = ship sunk");
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
-                System.out.print(actualField[i][j] + " ");
+                if (actualField[i][j] == 0 || actualField[i][j] == 3) {
+                    System.out.print("0 ");
+                }
+                else if (actualField[i][j] == 4) {
+                    System.out.print("# ");
+                }
+                else if (actualField[i][j] == 2) {
+                    System.out.print("X ");
+                }
+                else if (actualField[i][j] == 1) {
+                    System.out.print("? ");
+                }
             }
             System.out.println();
         }
